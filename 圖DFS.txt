@@ -1,0 +1,115 @@
+#include<stdio.h>
+#include<stdlib.h>
+#define MAX_V 11
+
+typedef struct node
+{
+	int v ;
+	struct node *link ;
+}Node ;
+Node *adjlist[MAX_V] ; //圖形鏈結串列
+
+void build_adjlist(int vi , int vj);
+void show_adjlist();
+int dfs(Node *graph[],int start,int end,int visit[]);
+int count = 0;
+
+void main()
+{
+	int vt,v1,v2,i=0,vi[MAX_V],start,end,re;
+	char c,str[100];
+	FILE *in;
+	if((in=fopen("graph1.txt","r"))==NULL)
+		printf("檔案找不到\n");
+	fscanf(in,"|V| = %d\nE = {",&vt);
+	printf("讀入的點個數:%d\n",vt);
+	for(int i=1 ; i<MAX_V ; i++) //初始化head為初始值
+		adjlist[i] = NULL;
+	while(fscanf(in,"(%d,%d)%c ",&v1,&v2,&c)!=EOF)
+	{
+		build_adjlist(v1,v2);
+		build_adjlist(v2,v1);
+		if(c=='}') //用一個字元判斷讀到是否為}
+		{
+			//printf("%d %d\n",v1,v2);
+			break;
+		}
+		//printf("%d %d\n",v1,v2); 印出形成的邊
+		i++;
+	}
+	printf("鏈結串列:\n");
+	show_adjlist();
+	printf("輸入兩點:");
+	scanf("%d %d",&start,&end);
+	re = dfs(adjlist,start,end,vi);
+	if(re == 0)
+		printf("沒找到\n");
+	system("pause");
+}
+
+void build_adjlist(int vi , int vj)
+{
+	Node *node = (Node*)malloc(sizeof(Node));//一開始malloc新節點
+	Node *ptr;//ptr跑adjlist要指定給的node
+	node->v = vj;//給初始值
+	node->link = NULL;
+	if(adjlist[vi] == NULL) //如果為空直接接node
+	{
+		adjlist[vi]= node;
+	}
+	else
+	{
+		ptr = adjlist[vi]; //ptr一開始先指到head
+		while(ptr->link != NULL) //ptr往下跑
+			ptr = ptr->link;
+		ptr->link= node; //ptr的link接到node
+	}
+}
+
+void show_adjlist()
+{
+	Node *s;
+	for(int i = 1; i < MAX_V ; i++)
+	{
+		s = adjlist[i];
+		printf("%d",i);
+		while(s != NULL)
+		{
+			printf("-> %d" , s->v) ;
+			s = s->link ;
+		}
+		printf("\n") ;
+	}
+}
+
+int dfs(Node *graph[],int start,int end,int visit[])
+{
+	visit[count++] = start;
+	if(start == end)
+	{
+		for(int i = 0; i < count; i++)
+			printf("%d ", visit[i]);
+		return 1;
+	}
+	int x;
+	Node *d =  graph[start];
+        while(d != NULL)
+	{
+		int pp = 0;
+		for(int i = 0; i < count; i++)
+		{
+			if(visit[i] == d->v)
+				pp = 1;
+		}
+		if(pp == 0)
+		{
+			x = dfs(graph, d->v , end , visit);
+			if(x == 1)
+				return 1;
+			else
+				count--;
+		}
+		d = d->link;
+	}
+	return 0;
+}

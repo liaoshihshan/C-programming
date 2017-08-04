@@ -1,0 +1,81 @@
+#include<stdio.h>
+#include<stdlib.h>
+#define vertex  7//節點數
+
+void bellmanford(int v,int cost[vertex+1][vertex+1],int dist[vertex+1],int n);
+
+void main()
+{
+	FILE *read;
+	int cost[vertex+1][vertex+1]={},dist[vertex+1],start;
+	read = fopen("graph3.txt","r");
+	printf("讀檔:\n");
+	for(int i=1 ; i<=vertex ; i++)
+	{
+		for(int j=1 ; j<=vertex ; j++)
+		{
+			fscanf(read,"%d",&cost[i][j]);
+			if(cost[i][j] == 0)
+				cost[i][j] = 10000;
+			printf("%d\t",cost[i][j]);
+		}
+		printf("\n");
+	}
+	printf("輸入起點:");
+	scanf("%d",&start);
+	bellmanford(start,cost,dist,vertex);
+	system("pause");
+}
+
+void bellmanford(int v,int cost[vertex+1][vertex+1],int dist[vertex+1],int n)
+{
+	int path[vertex+1]; //存放路徑
+	for(int i = 1; i<=n ; i++)
+	{
+		path[i] = -1;
+		dist[i]=cost[v][i];
+		if(dist[i]!=10000)
+			path[i]=v;
+	}
+	dist[v] = 0; //把開頭設為0
+	for(int k = 2 ; k < n ; k++)
+	{
+		for(int u = 1 ; u <= n ; u++)
+		{
+			if(v != u)
+			{			
+				for(int i = 1 ; i <= n ; i++)
+				{
+					if(cost[i][u] != 10000 && dist[i] != 10000)
+					{
+						if(dist[u] > dist[i] + cost[i][u])
+						{
+							dist[u] = dist[i] + cost[i][u];
+							path[u] = i;
+						}
+					}
+				}
+			}
+		}
+	}
+	printf("\n路徑:\n");
+	for(int i =1; i<=n;i++)
+	{
+		printf("%d<-",i);
+		int gg = i;
+		if(path[gg] == -1)
+			printf("無點");
+		else
+		{
+			while(path[gg]!=-1)
+			{
+				if(path[gg] == v)
+					printf("%d",path[gg]);
+				else
+					printf("%d<-",path[gg]);
+				gg = path[gg];
+			}
+		}
+		printf("\t\tdist=%d\n",dist[i]);
+	}
+}

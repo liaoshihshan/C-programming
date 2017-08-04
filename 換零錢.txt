@@ -1,0 +1,42 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+int findmin(int i,int j);
+
+void main()
+{
+	int n,min,k;
+	printf("块羆窥计:");
+	scanf("%d",&n);
+	printf("块传秗布肂计:");
+	scanf("%d",&k);
+	int *chance = (int *)malloc((k+1)*sizeof(int));
+	printf("块传秗布肂:");
+	for(int y = 1 ; y <= k ; y++)
+	  scanf("%d",&chance[y]);
+	int *money = (int *)malloc((n+1)*sizeof(int));
+	money[0] = 0;
+	money[1] = 1;
+	for(int i = 2 ; i <= n ; i++)
+	{
+		min = n;
+		for(int j = 1 ; j <= k ; j++)
+		{
+			if(i >= chance[j])
+				min = findmin(money[i-chance[j]]+1,min);
+		}
+		money[i] = min;
+	}
+	printf("程肂计:\n");
+	for(int h = 0 ; h <= n ; h++)
+		printf("%d\t",money[h]);
+	system("pause");
+}
+
+int findmin(int i,int j)
+{
+	if(i <= j)
+		return i;
+	else
+		return j;
+}

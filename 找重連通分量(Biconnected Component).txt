@@ -1,0 +1,148 @@
+#include<stdio.h>
+#include<stdlib.h>
+#define vertex 11 //節點數+1
+#define max 100
+int top = 0,num = 1,dfn[vertex]={},L[vertex];
+
+typedef struct node
+{
+	int v ;
+	struct node *link ;
+}Node ;
+Node *adjlist[vertex] ; //指標
+
+typedef struct{
+	int s,t;
+}edge;
+edge stack[max],e,p; //stack陣列存邊
+
+void build_adjlist(int vi , int vj);
+void show_adjlist();
+void push(edge item);
+edge pop();
+void print();
+int min(int i,int j);
+void bicmp(int u,int v);
+
+void main()
+{
+	FILE *read;
+	read = fopen("graph4.txt","r");
+	int graph[vertex][vertex],start;
+	printf("讀檔:\n");
+	for(int i=1 ; i<vertex ; i++)
+	{
+		for(int j=1 ; j<vertex ; j++)
+		{
+			fscanf(read,"%d",&graph[i][j]);
+			printf("%d ",graph[i][j]);
+			if(graph[i][j] == 1)
+                build_adjlist(i,j);
+		}
+		printf("\n");
+	}
+	printf("\nadjancy list:\n");
+	show_adjlist();
+	printf("\n輸入起點:");
+	scanf("%d",&start);
+	printf("\n");
+	bicmp(start,0);
+	for(int i=1 ; i<vertex ; i++)
+		printf("%d ",dfn[i]);
+	printf("\n");
+	for(int i=1 ; i<vertex ; i++)
+		printf("%d ",L[i]);
+	system("pause");
+}
+
+void build_adjlist(int vi , int vj)
+{
+	Node *node = (Node*)malloc(sizeof(Node));//一開始malloc新節點
+	Node *ptr;//ptr跑adjlist要指定給的node
+	node->v = vj;//給初始值
+	node->link = NULL;
+	if(adjlist[vi] == NULL) //如果為空直接接node
+	{
+		adjlist[vi]= node;
+	}
+	else
+	{
+		ptr = adjlist[vi]; //ptr一開始先指到head
+		while(ptr->link != NULL) //ptr往下跑
+			ptr = ptr->link;
+		ptr->link= node; //ptr的link接到node
+	}
+}
+
+void show_adjlist()
+{
+	Node *s;
+	for(int i = 1; i < vertex; i++)
+	{
+		s = adjlist[i];
+		printf("%d",i);
+		while(s != NULL)
+		{
+			printf("-> %d" , s->v) ;
+			s = s->link ;
+		}
+		printf("\n") ;
+	}
+}
+
+void push(edge item) //放入元素
+{
+     if(top >=max) //堆疊已滿
+              return;
+     else
+            stack[top++] = item;
+}
+
+edge  pop() //拿出元素
+{
+    if(top <= 0) //堆疊已空
+		printf("堆疊空了\n");
+     else
+         return stack[--top];
+}
+
+int min(int i,int j)
+{
+	if(i <= j)
+		return i;
+	else
+		return j;
+}
+
+void bicmp(int u,int v)
+{
+	dfn[u] = num;
+	L[u] = num;
+	num = num+1;
+	for(Node* w=adjlist[u] ; w != NULL ; w=w->link)
+	{
+		if((v != w->v) && (dfn[w->v] < dfn[u]))
+		{
+			e.s = u;
+			e.t = w->v;
+            push(e);
+		}
+		if(dfn[w->v] == 0)
+		{
+			bicmp(w->v,u);
+			L[u] = min(L[u],L[w->v]);
+			if(L[w->v] >= dfn[u])
+			{
+				printf("New bicomponent:\n");
+				do
+				{
+					p = pop();
+					printf("(%d,%d)",p.s,p.t);
+				}while((p.s != u || p.t != w->v) && (p.s != w->v || p.t != u));
+				printf("\n");
+			}
+		}
+		else if(w->v != v)
+			L[u] = min(L[u],dfn[w->v]);
+	}
+}

@@ -1,0 +1,96 @@
+#include<math.h>
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+
+typedef struct{
+	double x,y;
+}point;
+
+double dist(point a,point b);//算兩點距離
+void merge(point c[],point d[],int startoffirst,int endoffirst,int endofsecond);//合併
+double closetpair(point *x,point *y,point *z,int start,int end);//找最近點
+
+void main()
+{
+	int total,i;
+	double minal;
+	printf("輸入點的總數:");
+	scanf("%d",&total);
+	point *a =(point *)malloc(total*sizeof(point));
+	point *b =(point *)malloc(total*sizeof(point));
+	point *c =(point *)malloc(total*sizeof(point));
+	printf("輸入點x座標與y座標:\n");
+	for(i = 0 ; i < total ; i++)
+		scanf("%lf %lf",&a[i].x,&a[i].y);
+	minal = closetpair(a, b, c, 0, total - 1);
+	printf("最短距離:%.2f\n",minal);
+	system("pause");
+}
+
+double dist(point a,point b)
+{
+	return sqrt((float)(a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y));
+}
+
+void merge(point c[],point d[],int startoffirst,int endoffirst,int endofsecond)
+{
+	int first = startoffirst,second = endoffirst + 1,result = startoffirst;
+	while((first <= endoffirst) && (second <= endofsecond))//持續合併直到某一方結束
+	{
+		if(c[first].y < c[second].y)
+			d[result++] = c[first++];
+		else
+			d[result++] = c[second++];
+	}
+	if(first > endoffirst)//計算剩下部分
+	{
+		for(int q = second ; q <= endofsecond ; q++)
+			d[result++] = c[q];
+	}
+	else
+	{
+		for(int q = first ; q <= endoffirst ; q++)
+			d[result++] = c[q];
+	}
+}
+
+double closetpair(point *x,point *y,point *z,int start,int end)
+{
+	int i,j,k,mid = (start + end)/2;
+	double min = 0;
+	if((end - start) == 0)//只有一點
+		return 0;
+	if((end - start) == 1)//只有兩點
+		return dist(x[start],x[end]);
+	if((end - start) == 2)//只有三點
+	{
+		double d1 = dist(x[start],x[start+1]);
+		double d2 = dist(x[start+1],x[end]);
+		double d3 = dist(x[start],x[end]);
+		return ((d1 <= d2 && d1 <= d3)? d1 : (d2 <= d3? d2 : d3));
+	}
+	//超過三點
+	for(i = start ; i <= end ; i++)//建立以y軸排序的陣列
+		z[i] = y[i];
+	//分別處理
+	double left = closetpair(x,z,y,start,mid);
+	double right = closetpair(x,z,y,mid+1,end);
+	min = (left <= right ? left : right);//找出最近點所在
+	merge(z,y,start,mid,end);//合併計算重建y軸陣列
+	for(i = start, k = start; i < end ; i++)
+	{
+		if(abs(y[i].x - x[mid].x) <= min)
+			z[k++] = y[i];
+	}
+	for(i = start ; i < k ; i++)//從z[1~k-1]檢查所有點
+	{
+		for(j = i + 1 ; j < k && z[j].y - z[i].y < min ; j++)
+		{
+			double dp = dist(z[i],z[j]);
+			if(dp < min)//找到最近點對
+				min = dp;
+		}
+	}
+	return min;
+}

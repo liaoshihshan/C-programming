@@ -1,0 +1,214 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+int lcs(char *X,char *Y,int m,int n);
+int stringchangeequal(char *X,char *Y,int m,int n);
+void printfpath(int number1,int number2,int **path);//印路徑
+void printfequalstring(char *X,int number1,int number2,int **path);
+
+void main()
+{
+	char s1[20],s2[20];
+	int s1len,s2len,SE1,LCS,option;
+	printf("input string1:");
+	scanf("%s",s1);
+	printf("input string2:");
+	scanf("%s",s2);
+	s1len = strlen(s1);
+	s2len = strlen(s2);
+	printf("l)String Editing. 2)LCS.:");
+	scanf("%d",&option);
+	if(option == 1)
+	{
+		SE1 = stringchangeequal(s1,s2,s1len,s2len);
+		printf("\nmincost=%d\n",SE1);
+	}
+	else if(option == 2)
+	{
+		LCS = lcs(s1,s2,s1len,s2len);
+		printf("\nlonglengh=%d\n",LCS);
+	}
+	system("pause");
+}
+
+int stringchangeequal(char *X,char *Y,int m, int n)
+{
+	int const in = 1, de = 1, ch = 2;
+	int **cost,**path;
+	cost = (int **)malloc(sizeof(int*) * (m+1));
+	for(int i = 0; i <= m; i++)
+		cost[i] = (int*)malloc(sizeof(int) * (n+1));
+	path = (int **)malloc(sizeof(int*) * (m+1));
+	for(int i = 0; i <= m; i++)
+		path[i] = (int*)malloc(sizeof(int) * (n+1));
+	cost[0][0] = 0;
+	path[0][0] = 0;
+	for(int i = 1; i <= m; i++)
+	{
+		cost[i][0] = cost[i - 1][0] + de;
+		path[i][0] = 1;
+	}
+	for(int j = 1; j <= n; j++)
+	{
+		cost[0][j] = cost[0][j - 1] + in;
+		path[0][j] = 3;
+	}
+	for(int i = 1; i <= m; i++)
+	{
+		for(int j = 1; j <= n; j++)
+		{
+			if(X[i-1] == Y[j-1])
+			{
+				cost[i][j] = cost[i-1][j-1];
+				path[i][j] = 4;
+			}
+			else
+			{
+				int D, C, I;
+				D = cost[i-1][j] + de;
+				C = cost[i-1][j-1] + ch;
+				I = cost[i][j-1] + in;
+				if(D <= C  && D <= I)
+				{
+					cost[i][j] = D;
+					path[i][j] = 1;
+				}
+				else if(C <= D && C <= I)
+				{
+					cost[i][j] = C;
+					path[i][j] = 2;
+				}
+				else if(I <= D && I <= C)
+				{
+					cost[i][j] = I;
+					path[i][j] = 3;
+				}
+			}
+		}
+	}
+	printf("\ncost陣列:\n");
+	for(int i = 0; i <= m; i++)
+	{
+		for(int j = 0; j <= n; j++)
+			printf("%d ", cost[i][j]);
+		printf("\n");
+	}
+	printfpath(m,n,path);
+	return cost[m][n];
+}
+
+int lcs(char *X,char *Y,int m,int n)
+{
+	int **cost,**path;
+	cost = (int **)malloc(sizeof(int*) * (m+1));
+	for(int i = 0; i <= m; i++)
+		cost[i] = (int*)malloc(sizeof(int) * (n+1));
+	path = (int **)malloc(sizeof(int*) * (m+1));
+	for(int i = 0; i <= m; i++)
+		path[i] = (int*)malloc(sizeof(int) * (n+1));
+	for(int i = 0; i <= m; i++)
+	{
+		cost[i][0] = 0;
+		path[i][0] = 0;
+	}
+	for(int j = 0; j <= n; j++)
+	{
+		cost[0][j] = 0;
+		path[0][j] = 0;
+	}
+	for(int i = 1; i <= m; i++)
+	{
+		for(int j = 1; j <= n; j++)
+		{
+			if(X[i-1] == Y[j-1])
+			{
+				cost[i][j] = cost[i-1][j-1] + 1;
+				path[i][j] = 2;
+			}
+			else
+			{
+				if(cost[i][j-1] > cost[i-1][j])
+				{
+					cost[i][j] = cost[i][j-1];
+					path[i][j] = 3;
+				}
+				else
+				{
+					cost[i][j] = cost[i-1][j];
+					path[i][j] = 1;
+				}
+			}
+		}
+	}
+	printf("\nLCS陣列:\n");
+	for(int i = 0; i <= m; i++)
+	{
+		for(int j = 0; j <= n; j++)
+			printf("%d ", cost[i][j]);
+		printf("\n");
+	}
+	printfequalstring(X,m,n,path);
+	return cost[m][n];
+}
+
+void printfequalstring(char *X,int number1,int number2,int **path)
+{
+	int number3 = number1;
+	int number4 = number2;
+	int p = 5;
+	printf("相同子字串:");
+	while(p!=0)
+	{
+		p = path[number3][number4];
+		if(p == 1)
+			number3 = number3-1;
+		else if(p == 2)
+		{
+			printf("%c",X[number4]);
+            number3 = number3-1;
+			number4 = number4-1;
+		}
+		else if(p == 3)
+		{
+			number4 = number4-1;
+		}
+	}
+}
+
+void printfpath(int number1,int number2,int **path)
+{
+	int number3 = number1;
+	int number4 = number2;
+	int p = 5;
+	printf("\n路徑 : ");
+	while(p!=0)//找出路徑
+	{
+		p = path[number3][number4] ;
+		if(p == 1)
+		{
+			printf("(%d,%d) delete=1-> ",number3,number4);
+			number3 = number3-1;
+		}
+		else if(p == 2)
+		{
+			printf("(%d,%d) change=2-> ",number3,number4);
+			number3 = number3-1;
+			number4 = number4-1;
+		}
+		else if(p == 4)
+		{
+			printf("(%d,%d) change=0-> ",number3,number4);
+			number3 = number3-1;
+			number4 = number4-1;
+		}
+		else if(p == 3)
+		{
+			printf("(%d,%d) insert=1-> ",number3,number4);
+			number4 = number4-1;
+		}
+		else if(p == 0)
+			printf("原點:(%d,%d)",number3,number4);
+	}
+}
+

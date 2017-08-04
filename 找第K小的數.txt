@@ -1,0 +1,166 @@
+#include<time.h>
+#include<stdio.h>
+#include<stdlib.h>
+
+void test();//實驗
+int Select2(int *a, int k, int low, int up);
+int Partition(int *a, int n, int k);
+void Interchange(int *a, int i, int j);
+void InsertionSort(int *a, int low, int up);
+
+void main()
+{
+	int *a,*b,*s,n,max,se;
+	printf("輸入n:");
+	scanf("%d",&n);
+	s = (int *)malloc((n+1)*sizeof(int));
+	a = (int *)malloc((n+1)*sizeof(int));
+	b = (int *)malloc((n+1)*sizeof(int));
+	printf("產生的數字:\n");
+	for(int i=1 ; i<=n ; i++)
+	{
+		s[i] = rand()%n+1;
+		printf("%d\t",s[i]);
+		a[i] = s[i];
+		b[i] = s[i];
+	}
+	InsertionSort(a,1,n);
+	printf("\n排好序:\n");
+	for(int i=1 ; i<=n ; i++)
+		printf("%d\t",a[i]);
+	printf("第幾大:");
+	scanf("%d",&max);
+	printf("\nsort解答:%d\n",max,a[max]);
+	se = Select2(b,max,1,n-1);
+	printf("\nselect解答:%d\n",b[se]);
+	//test();
+	system("pause");
+}
+
+void Interchange(int *a, int i, int j)
+{
+	 int p = a[i];
+	 a[i] = a[j];
+	 a[j] = p;
+}
+
+void InsertionSort(int *a, int low, int up)
+{
+	int item, i;
+	for(int j = low+1; j <= up; j++)
+	{
+		item = a[j];
+		i = j-1;
+		while((i >= low) && (item < a[i]))
+		{
+			a[i+1] = a[i];
+			i = i-1;
+		}
+		a[i+1] = item;
+	}
+}
+
+int Partition(int *a, int m, int p)
+{
+	int v = a[m], i = m, j = p, t;
+	do
+	{
+		do{
+			i = i+1;
+		}while(a[i] < v);
+		do{
+			j =j-1;
+		}while(a[j] > v);
+		if(i < j)
+		{
+			t = a[i];
+			a[i] = a[j];
+			a[j] = t;
+		}
+	}while(i < j);
+	a[m] = a[j];
+	a[j] = v;
+	return j;
+}
+
+int Select2(int *a, int k, int low, int up)
+{
+	 int j, n, p,r=5,up1,up2;
+	 do
+	 {
+		n = up-low+1;
+		if(n <= r)
+		{
+			InsertionSort(a, low, up);
+			return low+k-1;
+		}
+		if(n%r != 0)
+			up1 = n/r+1;
+		else
+			up1 = n/r;
+		for(int i = 1; i <= up1; i++)
+		{
+			InsertionSort(a, low+(i-1)*r, low+(i*r)-1);
+			 p = a[low+i-1];
+			 a[low+i-1] = a[low+(i-1)*r+(r/2)-1];
+			 a[low+(i-1)*r+(r/2)-1] = p;
+		}
+		if((n/r)%2 != 0)
+			up2 = (n/r)/2+1;
+		else
+			up2 = (n/r)/2;
+		j = Select2(a,up2, low, low+(n/r)-1);
+		p = a[low];
+		a[low] = a[j];
+		a[j] = p;
+		j = Partition(a, low, up+1);
+		if(k == (j-low+1))
+			return j;
+		else 
+		{
+			if(k < (j-low+1))
+				up = j-1;
+			else
+			{
+				k = k - (j-low+1);
+				low = j+1;
+			}
+		}
+	 }while(1);
+}
+
+void test()
+{
+	int *r,*c,*k;
+	clock_t start1,stop1,start2,stop2;
+	double d1,d2,sum1,sum2;
+	printf("sort\t\tselect\n");
+	for(int i=1000 ; i<=10000 ;i+=1000)
+	{
+		sum1 = 0;
+		sum2 = 0;
+		r = (int *)malloc((i+1)*sizeof(int));
+		c = (int *)malloc((i+1)*sizeof(int));
+		k = (int *)malloc((i+1)*sizeof(int));
+		for(int j=1 ; j<=i ; j++)
+		{
+			r[j] = rand()%i+1;
+			c[j] = r[j];//複製陣列
+			k[j] = r[j];
+		}
+		start1 = clock();
+		InsertionSort(c,1,i);
+		stop1 = clock();
+		d1 = (double)(stop1-start1)/CLOCKS_PER_SEC;
+		sum1+=d1;
+		for(int max=1 ; max<=i ; max++)
+		{
+            start2 = clock();
+            Select2(k,max,1,i-1);
+			stop2 = clock();
+			d2 = (double)(stop2-start2)/CLOCKS_PER_SEC;
+			sum2+=d2;
+		}
+		printf("%d筆=%f\t%d筆=%f\n",i,sum1/i,i,sum2/i);
+	}
+}

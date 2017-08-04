@@ -1,0 +1,179 @@
+#include <stdio.h> 
+#include <stdlib.h> 
+#include <time.h>  
+#define swap(x,y) {int t; t = x; x = y; y = t;}  //交換的定義
+void Bubblesort(int [], int); //氣泡排序
+void Insertionsort(int [], int); //插入排序
+void Shellsort(int [],int);//謝耳排序
+void Selectionsort(int [], int); //選擇排序
+void Quicksort(int [], int, int); //快速排序
+void Mergesort(int [],int); //合併排序
+int Partition(int [], int, int);
+void Merge(int, int, int*, int*, int []);
+void main(){     
+	srand(time(NULL));  //隨機產生       
+	int number[6] = {5,3,2,1,6,4},r[6],i,s;     
+	printf("排序前：");
+	for(i = 0 ; i < 6 ;i++)
+		printf("%d ",number[i]);
+	printf("\n隨機取的數:");
+	for(i = 0; i < 6; i++){         
+		r[i] = rand() % 100;//rand為從1~100隨機取出的數
+		printf("%d ",r[i]);     
+	}
+	printf("\n1)氣泡排序 2)插入排序 3)謝耳排序 4)選擇排序 5)快速排序 6)合併排序:");
+	scanf("%d",&s);
+	switch(s) //狀況選擇
+	{
+	  case 1:
+		  Bubblesort(number, 6);
+		  Bubblesort(r, 6);
+		  printf("\n氣泡排序：");
+	      break;
+	  case 2:
+		  Insertionsort(number, 6);
+		  Insertionsort(r, 6);
+		  printf("\n插入排序：");
+		  break;
+	  case 3:
+		  Shellsort(number,6);
+		  Shellsort(r,6);
+		  printf("\n謝耳排序：");
+		  break;
+	  case 4:
+		  Selectionsort(number, 6);
+		  Selectionsort(r, 6);
+		  printf("\n選擇排序：");
+		  break;
+	  case 5:
+		  Quicksort(number, 0, 5);
+		  Quicksort(r, 0, 5);
+		  printf("\n快速排序：");
+	      break;
+	  case 6:
+		  Mergesort(number,6);
+		  Mergesort(r,6);
+		  printf("\n合併排序：");
+		  break;
+	}
+	for(i = 0; i < 6; i++)         
+		printf("%d ", number[i]);
+	printf("\n");
+	for(i = 0; i < 6; i++)
+		printf("%d ",r[i]);
+	system("pause"); 
+}
+void Bubblesort(int a[], int n){ 
+         //a為陣列，n為陣列全部資料數
+         int i, j;
+         for (i = n-1 ; i > 0 ; i--)
+		 {//i從最後一個往前走
+                for (j = 0 ; j < i ; j++)
+				{
+                        if(a[j] > a[j+1])
+                            //左大右小，將 a[j] 與 a[j+1] 交換
+							swap(a[j],a[j+1]);
+				}
+		 }
+}
+void Insertionsort(int a[], int n){      
+      int i, j, temp;
+      for(i = 1 ; i < n ; i++){//a[i]是要整理的元素(a[0]~a[i-1]已經整理好)
+         temp = a[i];
+         j = i;//j記錄空格位置
+         while (j > 0 && a[j-1] > temp){//空格左邊的值比temp大
+               a[j] = a[j-1];//空格左邊的值往右移一格
+               j--; 
+         }
+         a[j] = temp;//temp中的值放入最後的空位
+	  }
+}
+void Shellsort(int a[],int n)
+{
+	int group = n/2;
+	while(group > 0){//分組不斷除2直到為0
+		for(int i = 0; i<group ; i++){//從位置0到group的前一個位置
+			for(int j = i+group ; j<n ; j+=group){//從group位置開始，結束於超出原本array大小
+				for(int k = j-group ; k >= i ; k-=group){//從group前一個位置開始直至碰到底部i
+					if(a[k] > a[j]){//有比較大的就交換
+						swap(a[j],a[k]);
+					}else 
+						break;
+				}
+			}
+		}
+		group = group/2;
+	}
+}
+void Selectionsort(int a[], int n){	
+	 int i, j, max, temp;
+     for(i = n-1 ; i > 0 ; i--){   
+        max = i;//找出範圍中(a[0] ~ a[i])最大者，先假設a[i]最大
+	    for(j = i-1 ; j >= 0 ; j--){// j由右而左掃描
+	        if(a[j] > a[max])//第j個挑戰成功
+		      max = j; //max隨時紀錄最大者
+	          temp = a[max];//將a[i] 與a[max] 交換
+	          a[max] = a[i];
+	          a[i] = temp;
+		}
+	 }
+}
+int Partition(int a[], int left, int right){ //分割陣列為左右半部 ，回傳中樞值
+       int i = left-1,j; //i代表左半部最後一個值
+             for(j = left; j < right; j++) { //a[left~right-1]依序與中樞值比較
+                   if(a[j] <= a[right]) { //若<=中樞值預設為a[right]，放在左半部
+                       i++; 
+                       swap(a[i], a[j]); 
+                   } 
+             }   
+             swap(a[i+1], a[right]); 
+             return i+1;
+}
+void Quicksort(int a[], int left, int right){ 
+          if(left < right) { 
+             int pivot = Partition(a, left, right); 
+             Quicksort(a, left, pivot-1); //遞迴排序左半部(遞迴為函示自己呼叫自己)
+             Quicksort(a, pivot+1, right); //遞迴排序右半部
+          }
+}
+void Mergesort(int a[],int n)
+{
+    if (n > 1)//資料要超過一筆才能排序
+    {
+        int left = n/2, right = n-left; //設置left為左半部最後一筆資料，right為右半部最後一筆資料
+        int *l = (int *)malloc(left *sizeof(int));
+        int *r = (int *)malloc(right *sizeof(int));
+        for (int i = 0; i < left; i++)
+            l[i] = a[i];
+        for (int i = 0; i < right; i++)
+            r[i] = a[left + i];
+        Mergesort(l,left);
+        Mergesort(r,right);
+        Merge(left, right, l, r, a);
+    }
+}
+
+void Merge(int left, int right, int* l, int* r, int a[])
+{
+    int i = 0 , j = 0 , k = 0;
+    while (i < left && j < right)
+    {
+        if (l[i] < r[j])
+        {
+            a[k] = l[i];
+            i++;
+        }
+        else
+        {
+            a[k] = r[j];
+            j++;
+        }
+        k++;
+    }
+    if (i >= left)
+        for (int m = j, c = 0; m < right; m ++, c ++)
+            a[k + c] = r[m];
+    else
+        for (int m = i, c = 0; m < left; m ++, c ++)
+            a[k + c] = l[m];
+}

@@ -1,0 +1,149 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+bool place(int k,int i);
+void nqueens(int k,int n);
+//皇后問題演算法[皇后的擺法不能是同行,同列,同對角線],k為第幾個皇后,n為共有幾個皇后
+void swap(int *a,int i,int j);
+int partition(int *a,int m,int p);
+void quicksort(int *a,int p,int q);
+void sumofsubsets(int s,int k,int r); 
+//sumofsubsets演算法[給容量限制選剛好是容量限制的商品],s為目前選的重量總和,k為目前選到第幾個,r為第k到n的物品重量總和
+int count1=0,count2=0; //計算拜訪過的節點
+int *x,*w; //x array 和w array
+int m; //存容量限制
+
+void main()
+{
+	int n,s,option,count=1,sum=0;
+	do
+	{
+		printf("1)N-Queens 2)船可以裝多少物品:");
+		scanf("%d",&option);
+		if(option == 1)
+		{
+			printf("輸入幾個皇后:");
+			scanf("%d",&n);
+			x = (int *)malloc(n*sizeof(int));
+			nqueens(1,n);
+			printf("共拜訪%d個node\n",count1);
+		}
+		else if(option == 2)
+		{
+			printf("輸入幾個物品:");
+			scanf("%d",&s);
+			printf("輸入容量限制:");
+			scanf("%d",&m);
+			w =(int *)malloc(s*sizeof(int));
+			x = (int *)malloc(s*sizeof(int));
+			do
+			{
+				printf("輸入重量:");
+				scanf("%d",&w[count]);
+				if(count >= s)
+					break;
+				else
+					count++;
+			}while(1);
+			printf("重量排序後:\n");
+			quicksort(w,1,count+1);
+			for(int j=1 ; j<=count ; j++)
+			{
+				printf("%d\t",w[j]);
+				sum = sum + w[j];
+			}
+			printf("\n解:\n");
+			sumofsubsets(0,1,sum); //sum為全部物品的總重量
+			printf("共拜訪%d個node\n",count2);
+		}
+		else
+			printf("輸入錯誤!! please again.\n");
+	}while(option != 1 && option != 2);
+	system("pause");
+}
+
+bool place(int k,int i)
+{
+	for(int j=1 ; j<k ; j++)
+	{
+		if((x[j] == i) || (abs(x[j]-i) == abs(j-k)))
+			return false;
+	}
+	return true;
+}
+
+void nqueens(int k,int n)
+{
+	for(int i=1 ; i<=n ; i++)
+	{
+		count1 = count1+1;
+		if(place(k,i))
+		{
+			x[k] = i;
+			if(k == n)
+			{
+				for(int j=1 ; j<=n ; j++)
+					printf("%d\t",x[j]);
+				printf("\n");
+			}
+			else
+				nqueens(k+1,n);
+		}
+	}
+}
+
+void swap(int *a,int i,int j)
+{
+	int temp = a[i];
+	a[i] = a[j];
+	a[j] = temp;
+}
+
+int partition(int *a,int m,int p)
+{
+	int v = a[m],i = m,j = p;
+	do
+	{
+		do{
+			i++;
+		}while(a[i] < v);
+		do{
+			j--;
+		}while(a[j] > v);
+		if(i < j)
+          swap(a,i,j);
+	}while(i < j);
+	a[m] = a[j];
+	a[j] = v;
+	return j;
+}
+
+void quicksort(int *a,int p,int q)
+{
+	if(p < q)
+	{
+		int k = partition(a,p,q);
+        quicksort(a,p,k-1);
+        quicksort(a,k+1,q);
+	}
+}
+
+void sumofsubsets(int s,int k,int r)
+{
+   x[k] = 1;
+   count2 = count2+1;
+   if(s + w[k] == m)
+   {
+	   for(int y=1 ; y<=k ; y++)
+		   printf("%d\t",x[y]);
+	   printf("\n");
+   } 
+   else if(s + w[k] + w[k+1] <= m)
+	   sumofsubsets(s+w[k] , k+1 , r-w[k]);
+   count2 = count2+1;
+   if((s+r-w[k] >= m) && (s+w[k+1] <= m))
+   {
+	   x[k] = 0;
+       sumofsubsets(s , k+1 , r-w[k]);
+   }
+}

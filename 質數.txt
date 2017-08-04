@@ -1,0 +1,30 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+void primenumber(int n);
+
+void main()
+{
+	int number;
+	printf("輸入數值:");
+	scanf("%d",&number);
+	printf("\n1到%d的質數有:\n",number);
+	primenumber(number);
+	system("pause");
+}
+
+void primenumber(int n){
+	bool a[1000000];
+	a[1] = false;
+	for(int i = 2 ; i < n ; i++)
+		a[i] = true;
+	for(int i = 2 ; i < (n/2) ; i++){
+		for(int j = 2 ; j < (n/i) ; j++){
+			a[i*j] = false;
+		}
+	}
+	for(int i = 1 ; i < n ; i++){
+		if(a[i])
+			printf("%d\t",i);
+	}
+}

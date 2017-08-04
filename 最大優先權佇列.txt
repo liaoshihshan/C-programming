@@ -1,0 +1,156 @@
+#include<time.h>
+#include<stdio.h>
+#include<stdlib.h>
+#define parentindex(i) i == 0? 0 : (i-1)/2
+#define leftchildindex(i) (i)*2+1
+#define rightchildindex(i) (i)*2+2
+#define maxqueuesize 6
+static int a[maxqueuesize];
+static volatile int queuesize = 0; //初始值為0
+void maxheapadd(int a[],int n);
+void buildmaxheap(int a[],int n);
+void maxheapbalance(int a[],int n,int root);
+
+void main()
+{
+	srand(time(NULL));  //隨機產生
+	int r[6],i;
+	printf("亂數陣列：");
+	for(i = 0; i < 6; i++){         
+		r[i] = rand() % 100;//rand為從1~100隨機取出的數
+		printf("%d ",r[i]);     
+	}
+	printf("\n最大優先權佇列:");
+	buildmaxheap(r,6);
+	for(i = 0; i < 6; i++)         
+		printf("%d ", r[i]);
+	system("pause");
+}
+
+void maxheapadd(int a[],int n) //加入一元素到堆積，a為堆積陣列，n為新加入元素的索引
+{
+	int i,j,temp;
+	i = n; //本身索引初始值
+	do{
+		j = parentindex(i);//父節點索引
+		if(a[i] > a[j])//不符合堆積，與父節點交換
+		{
+			temp = a[i];
+			a[i] = a[j];
+			a[j] = temp;
+		}
+		else//符合堆積，離開
+		{
+			return;
+		}
+		i = j;//本身的新索引
+	}while(i != 0); //還沒到樹根root
+}
+
+void maxheapbalance(int a[],int n,int root)//a為堆積陣列(0~n-1)，root為樹根，維持陣列a(0~n-2)為堆積
+{
+	int i,l,r,big,temp;
+	big = root;//本身索引初始值
+	while(1)
+	{
+		i = big;//本身的索引
+		l = leftchildindex(i);
+		r = rightchildindex(i);
+		if((r < n) && (a[r] > a[l]))
+		{//有左右節點，右邊較大
+			big = r;
+		}
+		else if(l < n)
+		{//只有左節點
+			big = l;
+		}
+		else
+		{//本節點為葉節點，沒有子節點了
+			big = root;
+		}
+		if((big > root) && (a[i] < a[big]))
+		{//有子節點不小於本身節點，交換
+			temp = a[i];
+			a[i] = a[big];
+			a[big] = temp;
+		}
+		else//符合堆積，離開
+		{
+			return;
+		}
+	}
+}
+
+void buildmaxheap(int a[],int n)//建立最大堆積，a為元素排列不規則陣列，n為元素個數
+{
+	int root;
+	for(root = (n-1)/2 ; root >= 0 ;root--){//從非葉節點依序往上調整
+       maxheapbalance(a,n,root);
+	}
+}
+
+int maxheapdelete(int a[],int n)//a為堆積陣列(0~n-1)，回傳陣列最大值
+{
+	int temp;
+	temp = a[n-1];//取出最大值放在陣列最後面，原陣列最後一個元素放到樹根
+	a[n-1] = a[0];
+	a[0] = temp;
+	maxheapbalance(a,n-1,0);
+	return a[n-1];
+}
+
+bool insertqueue(int x)
+{//將一元素x加入陣列
+	if(queuesize >= maxqueuesize)
+	{//佇列空間不足
+		return false;
+	}
+	a[queuesize] = x;//將元素x放入佇列陣列最後
+	queuesize = queuesize + 1;//佇列長度加1
+	maxheapadd(a,queuesize -1);//新增元素到堆積裡
+}
+
+int getqueuesize()
+{//回傳佇列元素個數
+	return queuesize;
+}
+
+int queuemax()
+{//回傳佇列最大元素
+	if(queuesize <= 0)
+	{//佇列為空
+		return NULL;
+	}
+	return a[0];
+}
+
+int extractqueuemax()
+{//取出陣列最大元素
+	if(queuesize <= 0){
+		return NULL;
+	}
+	queuesize = queuesize - 1;//佇列長度減1
+	return maxheapdelete(a,queuesize + 1);
+}
+
+void changepriority(int i ,int v)
+{//索引為i的元素數值更改為v，並重整佇列
+	if((queuesize <= 0) || (i >= queuesize))
+	{//不符合
+		return;
+	}
+	if((queuesize == 1) || (a[i] == v))
+	{
+		a[i] = v;//只有一個元素或數值沒改變，不須重整
+	}
+	else if(v < a[i])
+	{
+		a[i] = v;//索引i的元素數值更改為v
+		maxheapbalance(a,queuesize,i);//數值變小，重整堆積
+	}
+	else
+	{
+		a[i] = v;//索引i的元素數值更改為v
+		maxheapadd(a,i);////數值變小，新增元素到堆積
+	}
+}

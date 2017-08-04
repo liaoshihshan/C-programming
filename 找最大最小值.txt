@@ -1,0 +1,41 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+void maxmin(int a[],int low,int high,int &max,int &min);
+
+void main()
+{
+	int n,max,min;
+	printf("輸入陣列元素總數:\n");
+	scanf("%d",&n);
+	int *a = (int *)malloc(n*sizeof(int));
+	printf("輸入陣列:\n");
+	for(int i = 0 ; i < n ; i++)
+		scanf("%d",&a[i]);
+	maxmin(a,0,n,max,min);
+	printf("最大值:%d\t最小值:%d\n",max,min);
+	system("pause");
+}
+
+void maxmin(int a[],int low,int high,int &max,int &min){
+	int mx,mn,mid;
+	if(low == high || high - low ==1){
+		if(a[high] > a[low]){
+			max = a[high];
+			min = a[low];
+		}
+		else{
+			max = a[low];
+			min = a[high];
+		}
+	}
+	else{
+		mid = (low + high)/2;
+		maxmin(a,low,mid,max,min);
+		maxmin(a,mid+1,high,mx,mn);
+		if(mx > max) 
+			max = mx;
+		if(mn = min)
+			min = mn;
+	}
+}

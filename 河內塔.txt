@@ -1,0 +1,44 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+
+void HanoiTower(int,char,char,char);//遞迴求河內塔問題之解
+
+int main()
+{
+
+	int n;//盤子總數
+	char A = 'A' , B = 'B' , C = 'C';//A B C 三個柱子
+
+	printf("河內塔問題:\n");
+	//輸入共有幾個盤子在A柱子中
+	printf("A有多少個盤子?");
+	scanf("%d",&n);
+	//沒有盤子
+	if ( n == 0 )
+		printf("沒有盤子可移動\n");
+	//呼叫副程式解河內塔問題
+	else
+	{ 
+		HanoiTower(n,A,B,C);
+        printf("結束!\n");
+	}	
+	system("pause");
+}
+
+
+void HanoiTower(int n,char a,char b,char c)
+{
+    //只有一個盤子時，直接移動 
+	if ( n == 1 )
+		printf("移動盤子從%c到%c\n",a,c);
+	else
+	{
+		//將A上n-1個盤子借助C移至B 
+		HanoiTower(n-1,a,c,b);
+		//將最大的盤子自A移到C
+		printf("移動盤子從%c到%c\n",a,c);
+		//將B上n-1個盤子借助A移至C 
+		HanoiTower(n-1,b,a,c);
+	}
+}

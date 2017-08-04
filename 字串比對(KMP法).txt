@@ -1,0 +1,44 @@
+#include<stdio.h>
+#include<string> 
+
+using namespace std;
+
+void main(){
+	char s[1000],p[1000];
+	printf("輸入字串 : ");
+	scanf("%s",s);
+	printf("輸入要比對字串 : ");
+	scanf("%s",p);
+	int n=strlen(s),m = strlen(p),i;
+	printf("%d\n",m);
+	//建立失敗陣列
+	int *f = (int *)malloc((m)*sizeof(int));
+	f[1] = 0;
+	for(int j = 2 ; j <= m ; j++){
+		i = f[j-1];
+		while(p[j] != p[i + 1] && i > 0){
+			i = f[i];
+		}
+		if(p[j] == p[i + 1])
+		   f[j] = i + 1;
+		else
+		   f[j] = 0;
+	}
+	printf("失敗陣列 = ");
+	for(int k = 1 ; k <= m ; k++)
+		printf("%d\t",f[k]);
+	//KMP演算法
+	int q = 0;
+	for(int i = 1 ; i <= n ; i++){
+		while(q > 0 && p[q+1] != s[i]){
+			q = f[q];
+		}
+		if(p[q + 1] == s[i])
+			q++;
+		if(q == m){
+			printf("字串相同開始位置:%d\n",i-m+1);
+			q = f[q];
+		}
+	}
+	system("pause");
+}

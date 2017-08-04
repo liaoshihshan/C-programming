@@ -1,0 +1,143 @@
+#include<stdio.h>
+#include<stdlib.h>
+#define vertex 7
+#define edge   9
+
+typedef struct{
+	int start,end,weight;
+}node;
+
+void swap(node *a,int i,int j);//把數字做交換
+int partition(node *a,int m,int p);//把資料分兩半，左小於pivot，右大於pivot
+void quicksort(node *a,int p,int q);//用quicksort排序邊
+int find(int *parent,int dot);//找root
+void weightunion(int *parent,int i,int j);//做聯集
+void kruskal(node * a,int n,int t[vertex][4],int count);//kruskal演算法
+
+void main()
+{
+	FILE *read;
+	int matrix[vertex][vertex]={},t[vertex][4]={},count=0;
+	node n[9];
+	read = fopen("graph2.txt","r");
+	printf("讀檔:\n");
+	for(int i=0 ; i<vertex ; i++)
+	{
+		for(int j=0 ; j<vertex ; j++)
+		{
+			fscanf(read,"%d",&matrix[i][j]);
+			if(matrix[i][j] != 0 && matrix[i][j] != matrix[j][i])
+			{
+				n[count].start = i+1;
+				n[count].end = j+1;
+				n[count].weight = matrix[i][j];
+				count++;
+			}
+			printf("%d\t",matrix[i][j]);
+		}
+		printf("\n");
+	}
+	printf("\n讀到的邊:\n");
+	for(int k=0 ; k<count ; k++)
+		printf("(%d,%d)->%d\n",n[k].start,n[k].end,n[k].weight);
+	kruskal(n,vertex,t,count);
+	system("pause");
+}
+
+void swap(node *a,int i,int j)
+{
+	node temp = a[i];
+	a[i] = a[j];
+	a[j] = temp;
+}
+
+int partition(node *a,int m,int p)
+{
+	node v = a[m];
+	int i = m,j = p;
+	do
+	{
+		do{
+			i++;
+		}while(a[i].weight < v.weight);
+		do{
+			j--;
+		}while(a[j].weight > v.weight);
+		if(i < j)
+          swap(a,i,j);
+	}while(i < j);
+	a[m] = a[j];
+	a[j] = v;
+	return j;
+}
+
+void quicksort(node *a,int p,int q)
+{
+	if(p < q)
+	{
+		int k = partition(a,p,q+1);
+        quicksort(a,p,k-1);
+        quicksort(a,k+1,q);
+	}
+}
+
+int find(int *parent,int dot)
+{
+	int i=dot;
+	while(parent[i] > 0)
+		i = parent[i];
+	return i;
+}
+
+void weightunion(int *parent,int i,int j)
+{
+	int temp = parent[i] + parent[j];
+	if(parent[i] > parent[j])
+	{
+		parent[i] = j; //j為父母
+		parent[j] = temp;
+	}
+	else
+	{
+		parent[j] = i; //i為父母
+		parent[i] = temp;
+	}
+}
+
+void kruskal(node * a,int n,int t[][4],int count)
+{
+	int* parent = (int*)malloc((n+1)*sizeof(int));
+	int q = 0,j,k,mincost = 0,r = 0;
+	for(int z = 1; z < n; z++)
+		parent[z] = -1;
+	quicksort(a,0,count-1);
+	printf("\n排序過的邊:\n");
+	for(int j=0 ; j<count ; j++)
+		printf("(%d,%d)->%d\n",a[j].start,a[j].end,a[j].weight);
+	while((q < n-1) && r != count)
+	{
+		j = find(parent,a[r].start);
+		k = find(parent,a[r].end);
+		if(j != k)
+		{
+			q++;
+			t[q][1] = a[r].start;
+			t[q][2] = a[r].end;
+			t[q][3] = a[r].weight;
+			mincost += a[r].weight;
+			weightunion(parent,j,k);
+		}
+		r++;
+	}
+	if(q != n-1)
+	{
+		printf("No spanning tree");
+	}
+	else
+	{
+		printf("\nspanning tree(找的點):\n");
+		for(int i = 1;i <= q; i++)
+			printf("(%d,%d)->%d\n",t[i][1],t[i][2],t[i][3]);
+		printf("mincost = %d\n",mincost);
+	}
+}
